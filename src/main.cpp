@@ -12,9 +12,8 @@
 int main(int argc, char *argv[]) {
     int chosenAlg = 0;
     chosenAlg = chooseAlg(argv[1]);
-    printf("%d\n", argc);
     std::vector<std::vector<int>> input = parseInput(argv, argc);
-    // printVecOfVec(input);
+    printVecOfVec(input);
     std::vector<std::vector<float>> results;
     switch (chosenAlg) {
         case 1:

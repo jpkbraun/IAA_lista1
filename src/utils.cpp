@@ -26,7 +26,6 @@ std::vector<std::vector<int>> parseInput(char** argv, int argc) {
         std::istringstream tokenStream(token);
         std::vector<int> state;
         int num;
-        printf("token: %s\n", token.c_str());
         while (tokenStream >> num) {
             state.push_back(num);
         }
