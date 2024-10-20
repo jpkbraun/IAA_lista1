@@ -21,7 +21,7 @@ std::vector<float> bfs_solver(const std::vector<int>& input) {
     if (isGoalState(input)) {
         auto end = std::chrono::high_resolution_clock::now();
         timeElapsed = std::chrono::duration<float>(end - start).count();
-        populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
+        result = populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
         return result;
     }
 
@@ -34,6 +34,7 @@ std::vector<float> bfs_solver(const std::vector<int>& input) {
         Node n = open.front();
         open.pop_front();
         std::vector<int> possibleMoves = getPossibleMoves8P(n.state, n.lastMove);
+        expandedNodes++;
         for (int i = 0; i < possibleMoves.size(); ++i) {
             std::vector<int> nextState = n.getNextState(n.state, possibleMoves[i]);
             Node newNode = n.makeNode(n, possibleMoves[i], nextState);
@@ -49,7 +50,6 @@ std::vector<float> bfs_solver(const std::vector<int>& input) {
                 totalHeuristic += newNode.h;
                 open.push_back(newNode);
                 closed.insert(nextState);
-                expandedNodes++;
             }
         }
     }
