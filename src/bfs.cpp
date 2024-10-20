@@ -16,7 +16,6 @@ std::vector<float> bfs_solver(const std::vector<int>& input) {
     float timeElapsed = 0.0;
     float meanHeuristic = 0.0;
     float initialHeuristic = (float)getManhattanDistance8P(input);
-    float totalHeuristic = initialHeuristic;
 
     if (isGoalState(input)) {
         auto end = std::chrono::high_resolution_clock::now();
@@ -42,12 +41,10 @@ std::vector<float> bfs_solver(const std::vector<int>& input) {
                 resultLength = newNode.g;
                 auto end = std::chrono::high_resolution_clock::now();
                 timeElapsed = std::chrono::duration<float>(end - start).count();
-                meanHeuristic = totalHeuristic / expandedNodes;
                 result = populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
                 return result;
             }
             if (closed.find(nextState) == closed.end()) {
-                totalHeuristic += newNode.h;
                 open.push_back(newNode);
                 closed.insert(nextState);
             }
