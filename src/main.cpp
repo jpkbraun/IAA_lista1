@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
             printf("Invalid algorithm\n");
             break;
     }
+    int a = 0;
     printResults(results);
     return 0;
 }

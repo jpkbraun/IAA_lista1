@@ -105,12 +105,12 @@ std::vector<int> getPossibleMoves8P(const std::vector<int>& state, int lastMove)
     if (zeroIndex / 3 != 0 && lastMove != DOWN) {
         moves.push_back(UP);
     }
-    // 2, 5, 8, can move to the left
-    if (zeroIndex % 3 != 2 && lastMove != RIGHT) {
+    // Not 0, 3, 6, can move to the left
+    if (zeroIndex % 3 != 0 && lastMove != RIGHT) {
         moves.push_back(LEFT);
     }
-    // 0, 3, 6, can move to the right
-    if (zeroIndex % 3 != 0 && lastMove != LEFT) {
+    // Not 2, 5, 8, can move to the right
+    if (zeroIndex % 3 != 2 && lastMove != LEFT) {
         moves.push_back(RIGHT);
     }
     // 5-, can move downward
