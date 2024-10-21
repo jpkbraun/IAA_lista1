@@ -51,4 +51,5 @@ std::vector<float> bfs_solver(long long input) {
             movement *= 2; 
         }
     }
+    throw std::runtime_error("Unsolvable state"); 
 }
