@@ -5,11 +5,11 @@
 
 class Node {
     public:
-        Node(std::vector<int> state, int g, int h, int lastMove);
+        Node(long long state, int g, int h, int lastMove);
         int getZeroIndex(std::vector<int> state);
-        std::vector<int> getNextState(std::vector<int> state, int move);
-        Node makeNode(Node n, int move, std::vector<int> state);
-        std::vector<int> state;
+        long long getNextState(long long state, int move);
+        Node makeNode(Node n, int move, long long state);
+        long long state;
         int g;
         int h;
         int lastMove;

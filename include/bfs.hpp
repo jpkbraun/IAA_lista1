@@ -5,8 +5,8 @@
 #include <deque>
 #include <unordered_set>
 
-std::vector<std::vector<float>> bfs(const std::vector<std::vector<int>>& input);
+std::vector<std::vector<float>> bfs(const std::vector<long long>& input);
 
-std::vector<float> bfs_solver(const std::vector<int>& input);
+std::vector<float> bfs_solver(long long input);
 
 #endif // BFS_HPP

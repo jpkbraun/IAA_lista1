@@ -9,49 +9,6 @@ int chooseAlg(const std::string& input) {
     return 0;
 }
 
-std::vector<std::vector<int>> parseInput(char** argv, int argc) {
-    std::vector<std::vector<int>> result;
-    // Combine all arguments from argv[2] onward into a single string
-    std::ostringstream inputStream;
-    for (int i = 2; i < argc; ++i) {
-        inputStream << argv[i];
-        if (i < argc - 1) {
-            inputStream << " ";
-        }
-    }
-
-    std::istringstream iss(inputStream.str());
-    std::string token;
-    while (std::getline(iss, token, ',')) {
-        std::istringstream tokenStream(token);
-        std::vector<int> state;
-        int num;
-        while (tokenStream >> num) {
-            state.push_back(num);
-        }
-        
-        result.push_back(state);
-    }
-    
-    return result;
-}
-
-void printVecOfVec(const std::vector<std::vector<int>>& vec) {
-    for (int i = 0; i < vec.size(); ++i) {
-        for (int j = 0; j < vec[i].size(); ++j) {
-            printf("%d ", vec[i][j]);
-        }
-        printf("\n");
-    }
-}
-
-void printState(const std::vector<int>& state) {
-    for (int i = 0; i < state.size(); ++i) {
-        printf("%d ", state[i]);
-    }
-    printf("\n");
-}
-
 int getManhattanDistance8P(const std::vector<int>& state) {
     int distance = 0;
     for (int i = 0; i < state.size(); ++i) {
@@ -78,45 +35,10 @@ int getManhattanDistance15P(const std::vector<int>& state) {
     return distance;
 }
 
-int isGoalState(const std::vector<int>& state) {
-    for (int i = 0; i < state.size(); ++i) {
-        if (state[i] != i) return 0;
-    }
-    return 1;
-}
-
 void printResults(const std::vector<std::vector<float>>& results) {
     for (int i = 0; i < results.size(); ++i) {
         printf("%f,%f,%f,%f,%f\n", results[i][0], results[i][1], results[i][2], results[i][3], results[i][4]);
     }
-}
-
-std::vector<int> getPossibleMoves8P(const std::vector<int>& state, int lastMove) {
-    std::vector<int> moves;
-    int zeroIndex = -1;
-    for (int i = 0; i < state.size(); ++i) {
-        if (state[i] == 0) {
-            zeroIndex = i;
-            break;
-        }
-    }
-    // 3+, can move upward
-    if (zeroIndex / 3 != 0 && lastMove != DOWN) {
-        moves.push_back(UP);
-    }
-    // Not 0, 3, 6, can move to the left
-    if (zeroIndex % 3 != 0 && lastMove != RIGHT) {
-        moves.push_back(LEFT);
-    }
-    // Not 2, 5, 8, can move to the right
-    if (zeroIndex % 3 != 2 && lastMove != LEFT) {
-        moves.push_back(RIGHT);
-    }
-    // 5-, can move downward
-    if (zeroIndex / 3 != 2 && lastMove != UP) {
-        moves.push_back(DOWN);
-    }
-    return moves;
 }
 
 std::vector<float> populateResult(float expandedNodes, float resultLength, float timeElapsed, float meanHeuristic, float initialHeuristic) {
@@ -128,3 +50,119 @@ std::vector<float> populateResult(float expandedNodes, float resultLength, float
     result.push_back(initialHeuristic);
     return result;
 }
+
+int getZeroPos(long long state) {
+    int zeroPos = -1;
+    for (int i = 0; i < 9; ++i) {
+        if ((state & 0xF) == 0) {
+            zeroPos = i;
+            break;
+        }
+        state >>= 4;
+    }
+    return zeroPos;
+}
+
+std::vector<long long> parseInput(char** argv, int argc) {
+    std::vector<long long> result;
+    // Combine all arguments from argv[2] onward into a single string
+    std::ostringstream inputStream;
+    for (int i = 2; i < argc; ++i) {
+        inputStream << argv[i];
+        if (i < argc - 1) {
+            inputStream << " ";
+        }
+    }
+
+    std::istringstream iss(inputStream.str());
+    std::string token;
+    while (std::getline(iss, token, ',')) {
+        std::istringstream tokenStream(token);
+        long long state = 0;
+        long long num;
+        int i = 0;
+        while (tokenStream >> num) {
+            state |= (num << (4 * i));
+            ++i;
+        }
+        
+        result.push_back(state);
+    }
+    
+    return result;
+}
+
+void printVecOfVec(const std::vector<long long>& results) {
+    for (int j = 0; j < results.size(); ++j) {
+        for (int i = 0; i < 9; ++i) {
+            // Extract the 4-bit chunk representing the tile at position i
+            int tile = (results[j] >> (i * 4)) & 0xF;
+            // Print the tile value
+            printf("%d ", tile);
+            
+            // Print a newline after every 3 tiles to form a 3x3 grid
+            if (i % 3 == 2) {
+                printf("\n");
+            }
+        }
+    }
+}
+
+void printState(long long state) {
+    for (int i = 0; i < 9; ++i) {
+        printf("%d ", state & 0xF);
+        state >>= 4;
+        if (i % 3 == 2) {
+            printf("\n");
+        }
+    }
+    printf("\n");
+}
+
+int getManhattanDistance8P(long long state) {
+    int distance = 0;
+    for (int i = 0; i < 9; ++i) {
+        if ((state & 0xF) == 0) {
+            continue;
+        }
+        int row = i / 3;
+        int col = i % 3;
+        long long position = state & 0xF;
+        int goalRow = position / 3;
+        int goalCol = position % 3;
+        distance += abs(row - goalRow) + abs(col - goalCol);
+        state >>= 4;
+    }
+    return distance;
+}
+
+std::vector<int> getPossibleMoves8P(long long state, int lastMove) {
+    std::vector<int> moves;
+    int zeroPos = getZeroPos(state);
+    // 3+, can move upward
+    if (zeroPos / 3 != 0 && lastMove != DOWN) {
+        moves.push_back(UP);
+    }
+    // Not 0, 3, 6, can move to the left
+    if (zeroPos % 3 != 0 && lastMove != RIGHT) {
+        moves.push_back(LEFT);
+    }
+    // Not 2, 5, 8, can move to the right
+    if (zeroPos % 3 != 2 && lastMove != LEFT) {
+        moves.push_back(RIGHT);
+    }
+    // 5-, can move downward
+    if (zeroPos / 3 != 2 && lastMove != UP) {
+        moves.push_back(DOWN);
+    }
+    return moves;
+}
+
+int isGoalState(long long state) {
+    for (int i = 0; i < 9; ++i) {
+        if ((state & 0xF) != i) return 0;
+        state >>= 4;
+    }
+    return 1;
+}
+

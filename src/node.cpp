@@ -1,45 +1,51 @@
 #include "node.hpp"
 
-Node::Node(std::vector<int> state, int g, int h, int lastMove) {
+Node::Node(long long state, int g, int h, int lastMove) {
     this->state = state;
     this->g = g;
     this->h = h;
     this->lastMove = lastMove;
 }
 
-int Node::getZeroIndex(std::vector<int> state) {
-    int zeroIndex = -1;
-    for (int i = 0; i < state.size(); ++i) {
-        if (state[i] == 0) {
-            return i;
-        }
-    }
-}
+long long Node::getNextState(long long state, int move) {
+    long long newState = state;
+    int zeroIndex = getZeroPos(state);
+    int targetIndex = zeroIndex; // The index of the tile to swap with
 
-std::vector<int> Node::getNextState(std::vector<int> state, int move) {
-    std::vector<int> newState = state;
-    int zeroIndex = getZeroIndex(state);
+    // Determine the index of the tile to swap with based on the move
     switch (move) {
         case UP:
-            newState[zeroIndex] = state[zeroIndex - 3];
-            newState[zeroIndex - 3] = 0;
+            targetIndex -= 3;
             break;
         case LEFT:
-            newState[zeroIndex] = state[zeroIndex - 1];
-            newState[zeroIndex - 1] = 0;
+            targetIndex -= 1;
             break;
         case RIGHT:
-            newState[zeroIndex] = state[zeroIndex + 1];
-            newState[zeroIndex + 1] = 0;
+            targetIndex += 1;
             break;
         case DOWN:
-            newState[zeroIndex] = state[zeroIndex + 3];
-            newState[zeroIndex + 3] = 0;
+            targetIndex += 3;
             break;
     }
+
+    // Extract the value of the tile at the target index
+    long long targetTile = (state >> (4 * targetIndex)) & 0xF;
+
+    // Clear the bits at the current zero position
+    newState &= ~(0xFLL << (4 * zeroIndex));
+
+    // Set the target tile at the zero's original position
+    newState |= (targetTile << (4 * zeroIndex));
+
+    // Clear the bits at the target position
+    newState &= ~(0xFLL << (4 * targetIndex));
+
+    // Set zero (0) at the target position
+    newState |= (0LL << (4 * targetIndex));
+
     return newState;
 }
 
-Node Node::makeNode(Node n, int move, std::vector<int> state) {
+Node Node::makeNode(Node n, int move, long long state) {
     return Node(state, n.g + 1, getManhattanDistance8P(state), move);
 }

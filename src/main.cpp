@@ -12,8 +12,7 @@
 int main(int argc, char *argv[]) {
     int chosenAlg = 0;
     chosenAlg = chooseAlg(argv[1]);
-    std::vector<std::vector<int>> input = parseInput(argv, argc);
-    printVecOfVec(input);
+    std::vector<long long> input = parseInput(argv, argc);
     std::vector<std::vector<float>> results;
     switch (chosenAlg) {
         case 1:
@@ -35,7 +34,6 @@ int main(int argc, char *argv[]) {
             printf("Invalid algorithm\n");
             break;
     }
-    int a = 0;
     printResults(results);
     return 0;
 }
