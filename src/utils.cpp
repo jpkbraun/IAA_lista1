@@ -52,15 +52,13 @@ std::vector<float> populateResult(float expandedNodes, float resultLength, float
 }
 
 int getZeroPos(long long state) {
-    int zeroPos = -1;
     for (int i = 0; i < 9; ++i) {
         if ((state & 0xF) == 0) {
-            zeroPos = i;
-            break;
+            return i; 
         }
         state >>= 4;
     }
-    return zeroPos;
+    return -1;
 }
 
 std::vector<long long> parseInput(char** argv, int argc) {
