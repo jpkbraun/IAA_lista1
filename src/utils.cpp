@@ -134,24 +134,24 @@ int getManhattanDistance8P(long long state) {
     return distance;
 }
 
-std::vector<int> getPossibleMoves8P(long long state, int lastMove) {
-    std::vector<int> moves;
+int getPossibleMoves8P(long long state, int lastMove) {
+    int moves = 0; 
     int zeroPos = getZeroPos(state);
     // 3+, can move upward
     if (zeroPos / 3 != 0 && lastMove != DOWN) {
-        moves.push_back(UP);
+        moves |= UP;
     }
     // Not 0, 3, 6, can move to the left
     if (zeroPos % 3 != 0 && lastMove != RIGHT) {
-        moves.push_back(LEFT);
+        moves |= LEFT;
     }
     // Not 2, 5, 8, can move to the right
     if (zeroPos % 3 != 2 && lastMove != LEFT) {
-        moves.push_back(RIGHT);
+        moves |= RIGHT;
     }
     // 5-, can move downward
     if (zeroPos / 3 != 2 && lastMove != UP) {
-        moves.push_back(DOWN);
+        moves |= DOWN;
     }
     return moves;
 }

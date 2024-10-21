@@ -16,12 +16,11 @@ enum Algorithm {
     GBFS
 };
 
-enum move {
-    UP,
-    LEFT,
-    RIGHT,
-    DOWN
-};
+
+#define UP 1
+#define LEFT 2
+#define RIGHT 4
+#define DOWN 8 
 
 int chooseAlg(const std::string& input);
 
@@ -41,7 +40,7 @@ void printState(long long state);
 
 int getManhattanDistance8P(long long state);
 
-std::vector<int> getPossibleMoves8P(long long state, int lastMove);
+int getPossibleMoves8P(long long state, int lastMove);
 
 int isGoalState(long long state);
 

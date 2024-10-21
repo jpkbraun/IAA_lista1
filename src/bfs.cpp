@@ -30,21 +30,26 @@ std::vector<float> bfs_solver(long long input) {
     while (!open.empty()) {
         Node n = open.front();
         open.pop_front();
-        std::vector<int> possibleMoves = getPossibleMoves8P(n.state, n.lastMove);
+        int possibleMoves = getPossibleMoves8P(n.state, n.lastMove);
         expandedNodes++;
-        for (int i = 0; i < possibleMoves.size(); ++i) {
-            long long nextState = n.getNextState(n.state, possibleMoves[i]);
-            Node newNode = n.makeNode(n, possibleMoves[i], nextState);
-            if (isGoalState(newNode.state)) {
-                resultLength = newNode.g;
-                auto end = std::chrono::high_resolution_clock::now();
-                timeElapsed = std::chrono::duration<float>(end - start).count();
-                return populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
+        int movement = 1; 
+        while (possibleMoves != 0) {
+            if (possibleMoves & 0x1){
+                long long nextState = n.getNextState(n.state, movement);
+                Node newNode = n.makeNode(n, movement, nextState);
+                if (isGoalState(newNode.state)) {
+                    resultLength = newNode.g;
+                    auto end = std::chrono::high_resolution_clock::now();
+                    timeElapsed = std::chrono::duration<float>(end - start).count();
+                    return populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
+                }
+                if (closed.find(nextState) == closed.end()) {
+                    open.push_back(newNode);
+                    closed.insert(nextState);
+                }
             }
-            if (closed.find(nextState) == closed.end()) {
-                open.push_back(newNode);
-                closed.insert(nextState);
-            }
+            possibleMoves = possibleMoves >> 1; 
+            movement *= 2; 
         }
     }
 }
