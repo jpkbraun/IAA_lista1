@@ -9,19 +9,6 @@ int chooseAlg(const std::string& input) {
     return 0;
 }
 
-int getManhattanDistance8P(const std::vector<int>& state) {
-    int distance = 0;
-    for (int i = 0; i < state.size(); ++i) {
-        if (state[i] == 0) continue;
-        int row = i / 3;
-        int col = i % 3;
-        int goalRow = state[i] / 3;
-        int goalCol = state[i] % 3;
-        distance += abs(row - goalRow) + abs(col - goalCol);
-    }
-    return distance;
-}
-
 int getManhattanDistance15P(const std::vector<int>& state) {
     int distance = 0;
     for (int i = 0; i < state.size(); ++i) {
@@ -120,16 +107,24 @@ void printState(long long state) {
 int getManhattanDistance8P(long long state) {
     int distance = 0;
     for (int i = 0; i < 9; ++i) {
-        if ((state & 0xF) == 0) {
+        // Extract the value of the tile at position i
+        int tileValue = (state >> (4 * i)) & 0xF;
+
+        // Skip if it is the zero tile
+        if (tileValue == 0) {
             continue;
         }
+
+        // Calculate the current row and column
         int row = i / 3;
         int col = i % 3;
-        long long position = state & 0xF;
-        int goalRow = position / 3;
-        int goalCol = position % 3;
+
+        // Calculate the goal row and column for this tile value
+        int goalRow = (tileValue) / 3;
+        int goalCol = (tileValue) % 3;
+
+        // Accumulate the Manhattan distance for this tile
         distance += abs(row - goalRow) + abs(col - goalCol);
-        state >>= 4;
     }
     return distance;
 }
