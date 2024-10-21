@@ -6,7 +6,7 @@ SRC_DIRS := ./src
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions. The shell will incorrectly expand these otherwise, but we want to send the * directly to the find command.
-SRCS := src/astar.cpp src/bfs.cpp src/gbfs.cpp src/idastar.cpp src/idfs.cpp src/main.cpp src/node.cpp src/utils.cpp 
+SRCS := src/astar.cpp src/bfs.cpp src/gbfs.cpp src/idastar.cpp src/idfs.cpp src/main.cpp src/node.cpp src/utils.cpp src/result.cpp
 
 # Prepends BUILD_DIR and appends .o to every src file
 # As an example, ./your_dir/hello.cpp turns into ./build/./your_dir/hello.cpp.o
