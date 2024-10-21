@@ -10,7 +10,6 @@ std::vector<std::vector<float>> bfs(const std::vector<long long>& input) {
 
 std::vector<float> bfs_solver(long long input) {
     auto start = std::chrono::high_resolution_clock::now();
-    std::vector<float> result;
     float expandedNodes = 0;
     float resultLength = 0;
     float timeElapsed = 0.0;
@@ -20,8 +19,7 @@ std::vector<float> bfs_solver(long long input) {
     if (isGoalState(input)) {
         auto end = std::chrono::high_resolution_clock::now();
         timeElapsed = std::chrono::duration<float>(end - start).count();
-        result = populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
-        return result;
+        return populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
     }
 
     std::deque<Node> open;
@@ -41,8 +39,7 @@ std::vector<float> bfs_solver(long long input) {
                 resultLength = newNode.g;
                 auto end = std::chrono::high_resolution_clock::now();
                 timeElapsed = std::chrono::duration<float>(end - start).count();
-                result = populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
-                return result;
+                return populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
             }
             if (closed.find(nextState) == closed.end()) {
                 open.push_back(newNode);
