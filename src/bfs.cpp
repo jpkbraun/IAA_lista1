@@ -36,15 +36,14 @@ std::vector<float> bfs_solver(long long input) {
         while (possibleMoves != 0) {
             if (possibleMoves & 0x1){
                 long long nextState = n.getNextState(n.state, movement);
-                Node newNode = n.makeNode(n, movement, nextState);
-                if (isGoalState(newNode.state)) {
-                    resultLength = newNode.g;
+                if (isGoalState(nextState)) {
+                    resultLength = n.g + 1;
                     auto end = std::chrono::high_resolution_clock::now();
                     timeElapsed = std::chrono::duration<float>(end - start).count();
                     return populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
                 }
                 if (closed.find(nextState) == closed.end()) {
-                    open.push_back(newNode);
+                    open.emplace_back(nextState, n.g + 1, getManhattanDistance8P(nextState), movement);
                     closed.insert(nextState);
                 }
             }

@@ -45,7 +45,3 @@ long long Node::getNextState(long long state, int move) {
 
     return newState;
 }
-
-Node Node::makeNode(Node n, int move, long long state) {
-    return Node(state, n.g + 1, getManhattanDistance8P(state), move);
-}
