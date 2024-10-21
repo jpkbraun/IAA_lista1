@@ -15,7 +15,11 @@ class Node {
         int whenInserted;
 };
 
-struct CompareNode {
+struct CompareNode { // for gbfs algorithm
+    bool operator()(const Node& n1, const Node& n2);
+};
+
+struct CompareNodeAStar { // for astar algorithm
     bool operator()(const Node& n1, const Node& n2);
 };
 

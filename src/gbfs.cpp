@@ -15,6 +15,7 @@ Result gbfs_solver(long long input) {
     float timeElapsed = 0.0;
     float meanHeuristic = 0.0;
     int initialHeuristic = getManhattanDistance8P(input);
+    int totalHeuristic = 0;
     int whenInserted = 0;
 
     std::priority_queue<Node, std::vector<Node>, CompareNode> open;
@@ -26,12 +27,16 @@ Result gbfs_solver(long long input) {
     while (!open.empty()) {
         Node n = open.top();
         open.pop();
+        totalHeuristic += n.h;
         if (closed.find(n.state) == closed.end()) {
             closed.insert(n.state);
             if (isGoalState(n.state)) {
                 resultLength = n.g;
                 auto end = std::chrono::high_resolution_clock::now();
                 timeElapsed = std::chrono::duration<float>(end - start).count();
+                if (expandedNodes != 0) {
+                    meanHeuristic = (float)totalHeuristic / (float)expandedNodes;
+                }
                 Result result = Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
                 return result;
             }
