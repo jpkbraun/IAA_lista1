@@ -23,7 +23,7 @@ std::vector<float> bfs_solver(long long input) {
     }
 
     std::deque<Node> open;
-    open.push_back(Node(input, 0, initialHeuristic, -1));
+    open.emplace_back(input, 0, initialHeuristic, -1);
     std::unordered_set<long long> closed;
     closed.insert(input);
 

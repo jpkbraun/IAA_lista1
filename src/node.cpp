@@ -31,9 +31,6 @@ long long Node::getNextState(long long state, int move) {
     // Extract the value of the tile at the target index
     long long targetTile = (state >> (4 * targetIndex)) & 0xF;
 
-    // Clear the bits at the current zero position
-    newState &= ~(0xFLL << (4 * zeroIndex));
-
     // Set the target tile at the zero's original position
     newState |= (targetTile << (4 * zeroIndex));
 
