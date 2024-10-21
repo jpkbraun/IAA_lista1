@@ -13,6 +13,9 @@ int main(int argc, char *argv[]) {
     int chosenAlg = 0;
     chosenAlg = chooseAlg(argv[1]);
     std::vector<long long> input = parseInput(argv, argc);
+    // for (int i = 0; i < input.size(); ++i) {
+    //     printf("%d ", getManhattanDistance8P(input[i]));
+    // }
     std::vector<std::vector<float>> results;
     switch (chosenAlg) {
         case 1:
