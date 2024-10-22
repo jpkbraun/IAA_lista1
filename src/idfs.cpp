@@ -2,54 +2,64 @@
 
 std::vector<Result> idfs(const std::vector<long long>& input) {
     std::vector<Result> result;
-    int depthLimit = 0;
     for (int i = 0; i < input.size(); ++i) {
-        Result subResult = idfs_solver(input[i], depthLimit);
-        // while(subResult.resultLength == -1) {
-        //     depthLimit++;
-        //     subResult = idfs_solver(input[i], depthLimit);
-        // }
-        result.push_back(subResult);
+        result.push_back(idfs_solver(input[i]));
+    }
+    return result;
+}
+
+std::chrono::time_point<std::chrono::high_resolution_clock> IDFS_start;
+int IDFS_expandedNodes;
+int IDFS_resultLength;
+float IDFS_timeElapsed;
+float IDFS_meanHeuristic;
+int IDFS_initialHeuristic;
+
+#include <memory>
+std::unique_ptr<Result> idfs_recursive(Node n, int depth){
+    if (isGoalState(n.state)) {
+        auto end = std::chrono::high_resolution_clock::now();
+        IDFS_timeElapsed = std::chrono::duration<float>(end - IDFS_start).count();
+        return std::make_unique<Result>(IDFS_expandedNodes, n.g, IDFS_timeElapsed, 0.0, IDFS_initialHeuristic);
+    }
+
+    if (depth > 0){
+        int possibleMoves = getPossibleMoves8P(n.state, n.lastMove);
+        IDFS_expandedNodes++;
+        int movement = 1;
+        while (possibleMoves != 0) {
+            if (possibleMoves & 0x1){
+                long long nextState = getNextState(n.state, movement);
+                auto result = idfs_recursive(Node(nextState, n.g + 1, getManhattanDistance8P(nextState), movement, 0), depth - 1);
+                if (result != nullptr){
+                    return result;
+                }
+            }
+            possibleMoves = possibleMoves >> 1;
+            movement *= 2;
+        }
+    }
+    return nullptr;
+}
+
+Result idfs_solver(long long input) {
+    IDFS_start = std::chrono::high_resolution_clock::now();
+    IDFS_expandedNodes = 0;
+    IDFS_resultLength = 0;
+    IDFS_timeElapsed = 0.0;
+    IDFS_meanHeuristic = 0.0;
+    IDFS_initialHeuristic = getManhattanDistance8P(input);
+
+    if (isGoalState(input)) {
+        auto end = std::chrono::high_resolution_clock::now();
+        IDFS_timeElapsed = std::chrono::duration<float>(end - IDFS_start).count();
+        return  Result(IDFS_expandedNodes, IDFS_resultLength, IDFS_timeElapsed, IDFS_meanHeuristic, IDFS_initialHeuristic);
+    }
+    for (int i = 0; i < INT16_MAX; i++){
+        auto result = idfs_recursive(Node(input, 0, IDFS_initialHeuristic, -1, 0), i);
+        if (result != nullptr){
+            return Result(result->expandedNodes, result->resultLength, result->timeElapsed, result->meanHeuristic, result->initialHeuristic);
+        }
     }
 }
 
-Result idfs_solver(long long input, int depthLimit) {
-    auto start = std::chrono::high_resolution_clock::now();
-    float expandedNodes = 0;
-    float resultLength = -1; // Use -1 to indicate failure to find a solution
-    float timeElapsed = 0.0f;
-    float meanHeuristic = 0.0f;
-    float initialHeuristic = (float)getManhattanDistance8P(input);
-
-    // // Check if the input is already the goal state
-    // if (isGoalState(input)) {
-    //     auto end = std::chrono::high_resolution_clock::now();
-    //     timeElapsed = std::chrono::duration<float>(end - start).count();
-    //     Result result = Result(expandedNodes, 0, timeElapsed, meanHeuristic, initialHeuristic);
-    //     return result;
-    // }
-
-    // // If depth limit is exhausted, return failure
-    // if (depthLimit <= 0) {
-    //     return Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
-    // }
-
-    // // Try all possible moves from the current state
-    // std::vector<int> possibleMoves = getPossibleMoves8P(input, -1);
-    // expandedNodes++; // Increment expanded nodes counter
-
-    // for (int move : possibleMoves) {
-    //     long long nextState = getNextState(input, move);
-    //     // Recursively solve with decreased depth limit
-    //     Result subResult = idfs_solver(nextState, depthLimit - 1);
-    //     if (subResult.resultLength != -1) { // If a solution is found
-    //         resultLength = subResult.resultLength + 1; // Increment the solution path length
-    //         auto end = std::chrono::high_resolution_clock::now();
-    //         timeElapsed = std::chrono::duration<float>(end - start).count();
-    //         Result result = Result(expandedNodes + subResult.expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
-    //         return result;
-    //     }
-    // }
-
-    return Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic); // Return failure result if no solution found
-}

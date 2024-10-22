@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
             results = bfs(input);
             break;
         case 2:
-            // results = idfs(input);
+            results = idfs(input);
             break;
         case 3:
             results = astar(input);
