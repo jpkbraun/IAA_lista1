@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
             results = astar(input);
             break;
         case 4:
-            // results = idastar(input);
+            results = idastar(input);
             break;
         case 5:
             results = gbfs(input);
