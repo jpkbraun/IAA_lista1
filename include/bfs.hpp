@@ -4,9 +4,10 @@
 #include "utils.hpp"
 #include <deque>
 #include <unordered_set>
+#include "result.hpp"
 
-std::vector<std::vector<float>> bfs(const std::vector<long long>& input);
+std::vector<Result> bfs(const std::vector<long long>& input);
 
-std::vector<float> bfs_solver(long long input);
+Result bfs_solver(long long input);
 
 #endif // BFS_HPP

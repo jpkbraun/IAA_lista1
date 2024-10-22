@@ -1,29 +1,29 @@
 #include "bfs.hpp"
 
-std::vector<std::vector<float>> bfs(const std::vector<long long>& input) {
-    std::vector<std::vector<float>> result;
+std::vector<Result> bfs(const std::vector<long long>& input) {
+    std::vector<Result> result;
     for (int i = 0; i < input.size(); ++i) {
         result.push_back(bfs_solver(input[i]));
     }
     return result;
 }
 
-std::vector<float> bfs_solver(long long input) {
+Result bfs_solver(long long input) {
     auto start = std::chrono::high_resolution_clock::now();
-    float expandedNodes = 0;
-    float resultLength = 0;
+    int expandedNodes = 0;
+    int resultLength = 0;
     float timeElapsed = 0.0;
     float meanHeuristic = 0.0;
-    float initialHeuristic = (float)getManhattanDistance8P(input);
+    int initialHeuristic = getManhattanDistance8P(input);
 
     if (isGoalState(input)) {
         auto end = std::chrono::high_resolution_clock::now();
         timeElapsed = std::chrono::duration<float>(end - start).count();
-        return populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
+        return  Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
     }
 
     std::deque<Node> open;
-    open.emplace_back(input, 0, initialHeuristic, -1);
+    open.emplace_back(input, 0, initialHeuristic, -1, 0);
     std::unordered_set<long long> closed;
     closed.insert(input);
 
@@ -35,15 +35,15 @@ std::vector<float> bfs_solver(long long input) {
         int movement = 1; 
         while (possibleMoves != 0) {
             if (possibleMoves & 0x1){
-                long long nextState = n.getNextState(n.state, movement);
+                long long nextState = getNextState(n.state, movement);
                 if (isGoalState(nextState)) {
                     resultLength = n.g + 1;
                     auto end = std::chrono::high_resolution_clock::now();
                     timeElapsed = std::chrono::duration<float>(end - start).count();
-                    return populateResult(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
+                    return Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
                 }
                 if (closed.find(nextState) == closed.end()) {
-                    open.emplace_back(nextState, n.g + 1, getManhattanDistance8P(nextState), movement);
+                    open.emplace_back(nextState, n.g + 1, getManhattanDistance8P(nextState), movement, 0);
                     closed.insert(nextState);
                 }
             }

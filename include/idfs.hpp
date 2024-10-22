@@ -3,6 +3,8 @@
 
 #include "utils.hpp"
 
-std::vector<std::vector<int>> idfs(const std::vector<std::vector<int>>& input);
+std::vector<Result> idfs(const std::vector<long long>& input);
+
+Result idfs_solver(long long input, int depthLimit);
 
 #endif // IDFS_HPP

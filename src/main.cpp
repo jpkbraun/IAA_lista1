@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     // for (int i = 0; i < input.size(); ++i) {
     //     printf("%d ", getManhattanDistance8P(input[i]));
     // }
-    std::vector<std::vector<float>> results;
+    std::vector<Result> results;
     switch (chosenAlg) {
         case 1:
             results = bfs(input);
@@ -25,13 +25,13 @@ int main(int argc, char *argv[]) {
             // results = idfs(input);
             break;
         case 3:
-            // results = astar(input);
+            results = astar(input);
             break;
         case 4:
-            // results = idastar(input);
+            results = idastar(input);
             break;
         case 5:
-            // results = gbfs(input);
+            results = gbfs(input);
             break;
         default:
             printf("Invalid algorithm\n");

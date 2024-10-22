@@ -7,6 +7,7 @@
 #include <sstream>
 #include <chrono>
 #include "node.hpp"
+#include "result.hpp"
 
 enum Algorithm {
     BFS,
@@ -26,9 +27,7 @@ int chooseAlg(const std::string& input);
 
 int getManhattanDistance15P(const std::vector<int>& state);
 
-void printResults(const std::vector<std::vector<float>>& results);
-
-std::vector<float> populateResult(float expandedNodes, float resultLength, float timeElapsed, float meanHeuristic, float initialHeuristic);
+void printResults(const std::vector<Result>& results);
 
 int getZeroPos(long long state);
 
@@ -43,5 +42,7 @@ int getManhattanDistance8P(long long state);
 int getPossibleMoves8P(long long state, int lastMove);
 
 int isGoalState(long long state);
+
+long long getNextState(long long state, int move);
 
 #endif // UTILS_HPP
