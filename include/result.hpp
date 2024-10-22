@@ -3,11 +3,11 @@
 
 class Result {
     public:
-        Result(int expandedNodes, int resultLength, float timeElapsed, float meanHeuristic, int initialHeuristic);
+        Result(int expandedNodes, int resultLength, float timeElapsed, double meanHeuristic, int initialHeuristic);
         int expandedNodes;
         int resultLength;
         float timeElapsed;
-        float meanHeuristic;
+        double meanHeuristic;
         int initialHeuristic;
 };
 

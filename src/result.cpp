@@ -1,6 +1,6 @@
 #include "result.hpp"
 
-Result::Result(int expandedNodes, int resultLength, float timeElapsed, float meanHeuristic, int initialHeuristic) {
+Result::Result(int expandedNodes, int resultLength, float timeElapsed, double meanHeuristic, int initialHeuristic) {
     this->expandedNodes = expandedNodes;
     this->resultLength = resultLength;
     this->timeElapsed = timeElapsed;

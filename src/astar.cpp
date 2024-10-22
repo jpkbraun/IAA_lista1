@@ -13,10 +13,11 @@ Result astar_solver(long long input) {
     int expandedNodes = 0;
     int resultLength = 0;
     float timeElapsed = 0.0;
-    float meanHeuristic = 0.0;
+    double meanHeuristic = 0.0;
     int initialHeuristic = getManhattanDistance8P(input);
-    int totalHeuristic = 0;
+    int totalHeuristic = initialHeuristic;
     int whenInserted = 0;
+    int calculatedHeuristic = 1; 
 
     std::priority_queue<Node, std::vector<Node>, CompareNodeAStar> open;
     if (initialHeuristic < INTMAX_MAX) {
@@ -27,7 +28,6 @@ Result astar_solver(long long input) {
     while (!open.empty()) {
         Node n = open.top();
         open.pop();
-        totalHeuristic += n.h;
         if (closed.find(n.state) == closed.end()) {
             closed.insert(n.state);
             if (isGoalState(n.state)) {
@@ -35,10 +35,9 @@ Result astar_solver(long long input) {
                 auto end = std::chrono::high_resolution_clock::now();
                 timeElapsed = std::chrono::duration<float>(end - start).count();
                 if (expandedNodes != 0) {
-                    meanHeuristic = (float)totalHeuristic / (float)expandedNodes;
+                    meanHeuristic = (double)totalHeuristic / (double)calculatedHeuristic;
                 }
-                Result result = Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
-                return result;
+                return Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
             }
             int possibleMoves = getPossibleMoves8P(n.state, n.lastMove);
             expandedNodes++;
@@ -48,7 +47,10 @@ Result astar_solver(long long input) {
 
                     long long nextState = getNextState(n.state, movement);
                     int h = getManhattanDistance8P(nextState);
+
                     if (h < INTMAX_MAX) {
+                        calculatedHeuristic++;
+                        totalHeuristic += h; 
                         open.emplace(nextState, n.g + 1, h, movement, whenInserted);
                         whenInserted++;
                     }
