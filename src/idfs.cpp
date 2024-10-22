@@ -15,23 +15,23 @@ float IDFS_timeElapsed;
 float IDFS_meanHeuristic;
 int IDFS_initialHeuristic;
 
-#include <memory>
-std::unique_ptr<Result> idfs_recursive(Node n, int depth){
-    if (isGoalState(n.state)) {
+bool idfs_recursive(long long state, int path, int move, int depth){
+    if (isGoalState(state)) {
         auto end = std::chrono::high_resolution_clock::now();
         IDFS_timeElapsed = std::chrono::duration<float>(end - IDFS_start).count();
-        return std::make_unique<Result>(IDFS_expandedNodes, n.g, IDFS_timeElapsed, 0.0, IDFS_initialHeuristic);
+        IDFS_resultLength = path;
+        return true; 
     }
 
     if (depth > 0){
-        int possibleMoves = getPossibleMoves8P(n.state, n.lastMove);
+        int possibleMoves = getPossibleMoves8P(state, move);
         IDFS_expandedNodes++;
         int movement = 1;
         while (possibleMoves != 0) {
             if (possibleMoves & 0x1){
-                long long nextState = getNextState(n.state, movement);
-                auto result = idfs_recursive(Node(nextState, n.g + 1, getManhattanDistance8P(nextState), movement, 0), depth - 1);
-                if (result != nullptr){
+                long long nextState = getNextState(state, movement);
+                auto result = idfs_recursive(nextState, path + 1, movement, depth - 1);
+                if (result){
                     return result;
                 }
             }
@@ -39,7 +39,7 @@ std::unique_ptr<Result> idfs_recursive(Node n, int depth){
             movement *= 2;
         }
     }
-    return nullptr;
+    return false;
 }
 
 Result idfs_solver(long long input) {
@@ -50,16 +50,12 @@ Result idfs_solver(long long input) {
     IDFS_meanHeuristic = 0.0;
     IDFS_initialHeuristic = getManhattanDistance8P(input);
 
-    if (isGoalState(input)) {
-        auto end = std::chrono::high_resolution_clock::now();
-        IDFS_timeElapsed = std::chrono::duration<float>(end - IDFS_start).count();
-        return  Result(IDFS_expandedNodes, IDFS_resultLength, IDFS_timeElapsed, IDFS_meanHeuristic, IDFS_initialHeuristic);
-    }
     for (int i = 0; i < INT16_MAX; i++){
-        auto result = idfs_recursive(Node(input, 0, IDFS_initialHeuristic, -1, 0), i);
-        if (result != nullptr){
-            return Result(result->expandedNodes, result->resultLength, result->timeElapsed, result->meanHeuristic, result->initialHeuristic);
+        auto result = idfs_recursive(input, 0, -1, i);
+        if (result){
+            return Result(IDFS_expandedNodes, IDFS_resultLength, IDFS_timeElapsed, 0.0, IDFS_initialHeuristic);
         }
     }
+    throw std::runtime_error("Unsolvable state"); 
 }
 
