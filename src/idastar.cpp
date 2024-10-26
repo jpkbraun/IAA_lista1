@@ -8,79 +8,72 @@ std::vector<Result> idastar(const std::vector<long long>& input) {
     return result;
 }
 
-Result idastar_solver(long long input) {
-    auto start = std::chrono::high_resolution_clock::now();
-    int expandedNodes = 0;
-    int resultLength = 0;
-    float timeElapsed = 0.0;
-    float meanHeuristic = 0.0;
-    int initialHeuristic = getManhattanDistance8P(input);
-    int totalHeuristic = 0;
-    int whenInserted = 0;
+std::chrono::time_point<std::chrono::high_resolution_clock> IDASTAR_start;
+int IDASTAR_expandedNodes;
+int IDASTAR_resultLength;
+float IDASTAR_timeElapsed;
+double IDASTAR_meanHeuristic;
+int IDASTAR_initialHeuristic;
+int IDASTAR_totalHeuristic;
+int IDASTAR_calculatedHeuristic;
 
-    if (initialHeuristic == INTMAX_MAX) {
-        return Result(0, -1, 0.0, 0.0, initialHeuristic);  // Return invalid result for unsolvable puzzles
+std::tuple<int, std::unique_ptr<Result>> idastar_recursive(long long state, int path, int move, int fLimit){
+    int f = path + getManhattanDistance8P(state);
+    if (f > fLimit){
+        return std::make_tuple(f, nullptr);
     }
-
-    Node root(input, 0, initialHeuristic, -1, 0);
-    int threshold = initialHeuristic;  // Start with initial heuristic as the threshold
-
-    std::unordered_set<long long> closed;  // Closed set to avoid re-expansion of nodes
-
-    while (true) {
-        // Perform a depth-limited search up to the current threshold
-        int temp = dfs(root, 0, threshold, expandedNodes, closed, totalHeuristic, whenInserted);
-        
-        if (temp == -1) {  // Goal state found
-            auto end = std::chrono::high_resolution_clock::now();
-            timeElapsed = std::chrono::duration<float>(end - start).count();
-            meanHeuristic = (float)totalHeuristic / (float)expandedNodes;
-            return Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
+    if (isGoalState(state)) {
+        auto end = std::chrono::high_resolution_clock::now();
+        IDASTAR_timeElapsed = std::chrono::duration<float>(end - IDASTAR_start).count();
+        IDASTAR_resultLength = path;
+        if (IDASTAR_expandedNodes != 0) {
+            IDASTAR_meanHeuristic = (double)IDASTAR_totalHeuristic / (double)IDASTAR_calculatedHeuristic;
         }
-
-        if (temp == INTMAX_MAX) {  // No solution exists
-            return Result(expandedNodes, -1, timeElapsed, meanHeuristic, initialHeuristic);
-        }
-
-        // Update the threshold to the next minimum bound
-        threshold = temp;
+        return std::make_tuple(INT_MAX, std::make_unique<Result>(IDASTAR_expandedNodes, IDASTAR_resultLength, IDASTAR_timeElapsed, IDASTAR_meanHeuristic, IDASTAR_initialHeuristic)); 
     }
-}
-
-int dfs(Node& n, int g, int threshold, int& expandedNodes, std::unordered_set<long long>& closed, int& totalHeuristic, int& whenInserted) {
-    int f = g + n.h;  // Calculate f(n) = g(n) + h(n)
-    if (f > threshold) return f;  // Prune if f exceeds the current threshold
-
-    if (isGoalState(n.state)) return -1;  // Goal found, return success signal
-
-    closed.insert(n.state);  // Mark node as expanded
-    totalHeuristic += n.h;
-    expandedNodes++;
-
-    int minThreshold = INTMAX_MAX;  // Track the next threshold for future iterations
-
-    int possibleMoves = getPossibleMoves8P(n.state, n.lastMove);
-    int movement = 1; 
+    int possibleMoves = getPossibleMoves8P(state, move);
+    IDASTAR_expandedNodes++;
+    int movement = 1;
+    int nextLimit = INT_MAX;
     while (possibleMoves != 0) {
-        if (movement & 0x1) {
-            long long nextState = getNextState(n.state, movement);
-            if (closed.find(nextState) == closed.end()) {
-                int nextH = getManhattanDistance8P(nextState);
-                if (nextH < INTMAX_MAX) {
-                    Node newNode = Node(nextState, n.g + 1, nextH, movement, whenInserted);
-                    whenInserted++;
-                    
-                    int temp = dfs(newNode, g + 1, threshold, expandedNodes, closed, totalHeuristic, whenInserted);
-                    if (temp == -1) return -1;  // Propagate success signal upwards
+        int rec_limit;
+        if (possibleMoves & 0x1){
+            long long nextState = getNextState(state, movement);
+            std::unique_ptr<Result> solution;
 
-                    minThreshold = std::min(minThreshold, temp);  // Track the minimum threshold
-                }
+            int h = getManhattanDistance8P(nextState);
+            IDASTAR_calculatedHeuristic++;
+            IDASTAR_totalHeuristic += h;
+            std::tie(rec_limit, solution) = idastar_recursive(nextState, path + 1, movement, fLimit);
+            if (solution != nullptr){
+                return std::make_tuple(INT_MAX, std::move(solution));
             }
         }
-        movement *= 2;
         possibleMoves = possibleMoves >> 1;
+        movement *= 2;
+        nextLimit = std::min(nextLimit, rec_limit);
     }
+    return std::make_tuple(nextLimit, nullptr);
+}
 
-    closed.erase(n.state);  // Unmark the node (important for iterative deepening)
-    return minThreshold;
+Result idastar_solver(long long input) {
+    IDASTAR_start = std::chrono::high_resolution_clock::now();
+    IDASTAR_expandedNodes = 0;
+    IDASTAR_resultLength = 0;
+    IDASTAR_timeElapsed = 0.0;
+    IDASTAR_meanHeuristic = 0.0;
+    IDASTAR_initialHeuristic = getManhattanDistance8P(input);
+    IDASTAR_totalHeuristic = IDASTAR_initialHeuristic;
+    IDASTAR_calculatedHeuristic = 1;
+    int fLimit = IDASTAR_initialHeuristic;
+
+    for (int i = 0; i < INT16_MAX; i++){
+        auto result = idastar_recursive(input, 0, -1, fLimit);
+
+        if (std::get<1>(result) != nullptr){
+            return Result(IDASTAR_expandedNodes, IDASTAR_resultLength, IDASTAR_timeElapsed, IDASTAR_meanHeuristic, IDASTAR_initialHeuristic);
+        }
+        fLimit = std::get<0>(result);
+    }
+    throw std::runtime_error("Unsolvable state");
 }
