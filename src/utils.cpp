@@ -9,19 +9,6 @@ int chooseAlg(const std::string& input) {
     return 0;
 }
 
-int getManhattanDistance15P(const std::vector<int>& state) {
-    int distance = 0;
-    for (int i = 0; i < state.size(); ++i) {
-        if (state[i] == 0) continue;
-        int row = i / 4;
-        int col = i % 4;
-        int goalRow = state[i] / 4;
-        int goalCol = state[i] % 4;
-        distance += abs(row - goalRow) + abs(col - goalCol);
-    }
-    return distance;
-}
-
 void printResults(const std::vector<Result>& results) {
     for (int i = 0; i < results.size(); ++i) {
         printf("%d,%d,%f,%f,%d\n", results[i].expandedNodes, results[i].resultLength, results[i].timeElapsed, results[i].meanHeuristic, results[i].initialHeuristic);
@@ -38,7 +25,17 @@ int getZeroPos(long long state) {
     return -1;
 }
 
-std::vector<long long> parseInput(char** argv, int argc) {
+int getZeroPos15P(long long state) {
+    for (int i = 0; i < 16; ++i) {
+        if ((state & 0xF) == 0) {
+            return i; 
+        }
+        state >>= 4;
+    }
+    return -1;
+}
+
+std::vector<long long> parseInput(char** argv, int argc, int *puzzleSize) {
     std::vector<long long> result;
     // Combine all arguments from argv[2] onward into a single string
     std::ostringstream inputStream;
@@ -60,7 +57,7 @@ std::vector<long long> parseInput(char** argv, int argc) {
             state |= (num << (4 * i));
             ++i;
         }
-        
+        *puzzleSize = i;
         result.push_back(state);
     }
     
@@ -83,11 +80,28 @@ void printVecOfVec(const std::vector<long long>& results) {
     }
 }
 
+void printVecOfVec15P(const std::vector<long long>& results) {
+    for (int j = 0; j < results.size(); ++j) {
+        printState15P(results[j]);
+    }
+}
+
 void printState(long long state) {
     for (int i = 0; i < 9; ++i) {
         printf("%d ", state & 0xF);
         state >>= 4;
         if (i % 3 == 2) {
+            printf("\n");
+        }
+    }
+    printf("\n");
+}
+
+void printState15P(long long state) {
+    for (int i = 0; i < 16; ++i) {
+        printf("%d ", state & 0xF);
+        state >>= 4;
+        if (i % 4 == 3) {
             printf("\n");
         }
     }
@@ -119,6 +133,31 @@ int getManhattanDistance8P(long long state) {
     return distance;
 }
 
+int getManhattanDistance15P(long long state) {
+    int distance = 0;
+    for (int i = 0; i < 16; ++i) {
+        // Extract the value of the tile at position i
+        int tileValue = (state >> (4 * i)) & 0xF;
+
+        // Skip if it is the zero tile
+        if (tileValue == 0) {
+            continue;
+        }
+
+        // Calculate the current row and column
+        int row = i / 4;
+        int col = i % 4;
+
+        // Calculate the goal row and column for this tile value
+        int goalRow = (tileValue) / 4;
+        int goalCol = (tileValue) % 4;
+
+        // Accumulate the Manhattan distance for this tile
+        distance += abs(row - goalRow) + abs(col - goalCol);
+    }
+    return distance;
+}
+
 int getPossibleMoves8P(long long state, int lastMove) {
     int moves = 0; 
     int zeroPos = getZeroPos(state);
@@ -141,8 +180,38 @@ int getPossibleMoves8P(long long state, int lastMove) {
     return moves;
 }
 
+int getPossibleMoves15P(long long state, int lastMove) {
+    int moves = 0; 
+    int zeroPos = getZeroPos15P(state);
+    // 4+, can move upward
+    if (zeroPos / 4 != 0 && lastMove != DOWN) {
+        moves |= UP;
+    }
+    // Not 0, 3, 6, can move to the left
+    if (zeroPos % 4 != 0 && lastMove != RIGHT) {
+        moves |= LEFT;
+    }
+    // Not 2, 5, 8, can move to the right
+    if (zeroPos % 4 != 3 && lastMove != LEFT) {
+        moves |= RIGHT;
+    }
+    // 5-, can move downward
+    if (zeroPos / 4 != 3 && lastMove != UP) {
+        moves |= DOWN;
+    }
+    return moves;
+}
+
 int isGoalState(long long state) {
     for (int i = 0; i < 9; ++i) {
+        if ((state & 0xF) != i) return 0;
+        state >>= 4;
+    }
+    return 1;
+}
+
+int isGoalState15P(long long state) {
+    for (int i = 0; i < 16; ++i) {
         if ((state & 0xF) != i) return 0;
         state >>= 4;
     }
@@ -167,6 +236,45 @@ long long getNextState(long long state, int move) {
             break;
         case DOWN:
             targetIndex += 3;
+            break;
+    }
+
+    // Extract the value of the tile at the target index
+    long long targetTile = (state >> (4 * targetIndex)) & 0xF;
+
+    // Clear the bits at the current zero position
+    newState &= ~(0xFLL << (4 * zeroIndex));
+
+    // Set the target tile at the zero's original position
+    newState |= (targetTile << (4 * zeroIndex));
+
+    // Clear the bits at the target position
+    newState &= ~(0xFLL << (4 * targetIndex));
+
+    // Set zero (0) at the target position
+    newState |= (0LL << (4 * targetIndex));
+
+    return newState;
+}
+
+long long getNextState15P(long long state, int move) {
+    long long newState = state;
+    int zeroIndex = getZeroPos15P(state);
+    int targetIndex = zeroIndex; // The index of the tile to swap with
+
+    // Determine the index of the tile to swap with based on the move
+    switch (move) {
+        case UP:
+            targetIndex -= 4;
+            break;
+        case LEFT:
+            targetIndex -= 1;
+            break;
+        case RIGHT:
+            targetIndex += 1;
+            break;
+        case DOWN:
+            targetIndex += 4;
             break;
     }
 

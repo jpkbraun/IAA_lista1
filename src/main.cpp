@@ -12,7 +12,8 @@
 int main(int argc, char *argv[]) {
     int chosenAlg = 0;
     chosenAlg = chooseAlg(argv[1]);
-    std::vector<long long> input = parseInput(argv, argc);
+    int puzzleSize = 0;
+    std::vector<long long> input = parseInput(argv, argc, &puzzleSize);
     // for (int i = 0; i < input.size(); ++i) {
     //     printf("%d ", getManhattanDistance8P(input[i]));
     // }
@@ -25,7 +26,7 @@ int main(int argc, char *argv[]) {
             results = idfs(input);
             break;
         case 3:
-            results = astar(input);
+            results = astar(input, puzzleSize);
             break;
         case 4:
             results = idastar(input);
