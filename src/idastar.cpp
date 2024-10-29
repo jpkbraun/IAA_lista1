@@ -26,9 +26,7 @@ std::tuple<int, std::unique_ptr<Result>> idastar_recursive(long long state, int 
         auto end = std::chrono::high_resolution_clock::now();
         IDASTAR_timeElapsed = std::chrono::duration<float>(end - IDASTAR_start).count();
         IDASTAR_resultLength = path;
-        if (IDASTAR_expandedNodes != 0) {
-            IDASTAR_meanHeuristic = (double)IDASTAR_totalHeuristic / (double)IDASTAR_calculatedHeuristic;
-        }
+        IDASTAR_meanHeuristic = (double)IDASTAR_totalHeuristic / (double)IDASTAR_calculatedHeuristic;
         return std::make_tuple(INT_MAX, std::make_unique<Result>(IDASTAR_expandedNodes, IDASTAR_resultLength, IDASTAR_timeElapsed, IDASTAR_meanHeuristic, IDASTAR_initialHeuristic)); 
     }
     int possibleMoves = getPossibleMoves8P(state, move);
@@ -36,11 +34,10 @@ std::tuple<int, std::unique_ptr<Result>> idastar_recursive(long long state, int 
     int movement = 1;
     int nextLimit = INT_MAX;
     while (possibleMoves != 0) {
-        int rec_limit;
+        int rec_limit = INT_MAX;
         if (possibleMoves & 0x1){
             long long nextState = getNextState(state, movement);
             std::unique_ptr<Result> solution;
-
             int h = getManhattanDistance8P(nextState);
             IDASTAR_calculatedHeuristic++;
             IDASTAR_totalHeuristic += h;
@@ -49,8 +46,8 @@ std::tuple<int, std::unique_ptr<Result>> idastar_recursive(long long state, int 
                 return std::make_tuple(INT_MAX, std::move(solution));
             }
         }
-        possibleMoves = possibleMoves >> 1;
         movement *= 2;
+        possibleMoves = possibleMoves >> 1;
         nextLimit = std::min(nextLimit, rec_limit);
     }
     return std::make_tuple(nextLimit, nullptr);
@@ -67,7 +64,7 @@ Result idastar_solver(long long input) {
     IDASTAR_calculatedHeuristic = 1;
     int fLimit = IDASTAR_initialHeuristic;
 
-    for (int i = 0; i < INT16_MAX; i++){
+    while (fLimit < INT_MAX) {
         auto result = idastar_recursive(input, 0, -1, fLimit);
 
         if (std::get<1>(result) != nullptr){
