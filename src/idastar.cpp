@@ -18,7 +18,10 @@ int IDASTAR_totalHeuristic;
 int IDASTAR_calculatedHeuristic;
 
 std::tuple<int, std::unique_ptr<Result>> idastar_recursive(long long state, int path, int move, int fLimit){
-    int f = path + getManhattanDistance8P(state);
+    int h = getManhattanDistance8P(state);
+    IDASTAR_calculatedHeuristic++;
+    IDASTAR_totalHeuristic += h;
+    int f = path + h;
     if (f > fLimit){
         return std::make_tuple(f, nullptr);
     }
@@ -38,9 +41,6 @@ std::tuple<int, std::unique_ptr<Result>> idastar_recursive(long long state, int 
         if (possibleMoves & 0x1){
             long long nextState = getNextState(state, movement);
             std::unique_ptr<Result> solution;
-            int h = getManhattanDistance8P(nextState);
-            IDASTAR_calculatedHeuristic++;
-            IDASTAR_totalHeuristic += h;
             std::tie(rec_limit, solution) = idastar_recursive(nextState, path + 1, movement, fLimit);
             if (solution != nullptr){
                 return std::make_tuple(INT_MAX, std::move(solution));
