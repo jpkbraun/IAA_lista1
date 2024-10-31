@@ -43,7 +43,7 @@ Result bfs_solver(long long input) {
                     return Result(expandedNodes, resultLength, timeElapsed, meanHeuristic, initialHeuristic);
                 }
                 if (closed.find(nextState) == closed.end()) {
-                    open.emplace_back(nextState, n.g + 1, getManhattanDistance8P(nextState), movement, 0);
+                    open.emplace_back(nextState, n.g + 1, 0.0, movement, 0);
                     closed.insert(nextState);
                 }
             }
